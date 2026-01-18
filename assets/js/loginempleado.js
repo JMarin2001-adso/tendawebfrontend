@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://zippy-miracle-production.up.railway.app";
 
 document.getElementById('loginForm').addEventListener('submit', async e => {
   e.preventDefault();
@@ -7,7 +7,7 @@ document.getElementById('loginForm').addEventListener('submit', async e => {
   const contrasena = document.getElementById('password').value.trim();
 
   try {
-    const resp = await fetch("http://127.0.0.1:8000/user/login-empleado/", {
+    const resp = await fetch(`${API_BASE}/user/login-empleado/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

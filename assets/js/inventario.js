@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://zippy-miracle-production.up.railway.app";
 // elementos 
 const modalEntrada = document.getElementById("modal");
 const modalSalida = document.getElementById("modalSalida");
@@ -50,7 +50,7 @@ function closeSalida() {
 //Inventario 
 async function cargarInventarioBackend() {
     try {
-        const res = await fetch("http://127.0.0.1:8000/producto/inventario");
+        const res = await fetch(`${API_BASE}/producto/inventario`);
         const data = await res.json();
 
         if (res.ok && data.success) {
@@ -141,7 +141,7 @@ formEntrada.addEventListener("submit", async (e) => {
 
         console.log("📌 ENVIANDO A /entrada", body);
 
-        var url = "http://127.0.0.1:8000/producto/entrada";
+        var url = "${API_BASE}/producto/entrada";
     }
 
     //entrada de cantidad a productos existentes
@@ -157,7 +157,7 @@ formEntrada.addEventListener("submit", async (e) => {
 
         console.log("📌 ENVIANDO A /entrada-stock", body);
 
-        var url = "http://127.0.0.1:8000/producto/entrada-stock";
+        var url = "${API_BASE}/producto/entrada-stock";
     }
 
     try {
@@ -207,7 +207,7 @@ formSalida.addEventListener("submit", async (e) => {
     };
 
     try {
-        const res = await fetch("http://127.0.0.1:8000/producto/salida", {
+        const res = await fetch(`${API_BASE}/producto/salida`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body)

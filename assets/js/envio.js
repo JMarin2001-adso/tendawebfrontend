@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://zippy-miracle-production.up.railway.app";
 
 //Tabla de envios
 const tablaEnvios = document.getElementById("tablaEnvios");

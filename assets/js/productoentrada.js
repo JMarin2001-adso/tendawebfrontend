@@ -1,4 +1,4 @@
-
+const API_BASE = "https://zippy-miracle-production.up.railway.app";
 // Vista previa de imagen seleccionada
 
 document.getElementById("imagenes").addEventListener("change", function () {
@@ -47,7 +47,7 @@ document.getElementById("productoForm").addEventListener("submit", async functio
   }
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/producto/", {
+    const response = await fetch(`${API_BASE}/producto/`, {
       method: "POST",
       body: formData
     });

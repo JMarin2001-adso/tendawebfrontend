@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://zippy-miracle-production.up.railway.app";
 
 // Obtener ID del pedido desde la URL
 const urlParams = new URLSearchParams(window.location.search);

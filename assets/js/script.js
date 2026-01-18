@@ -1,4 +1,4 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://zippy-miracle-production.up.railway.app";
 
 //funciones de modales
 window.openRegisterModal = () => document.getElementById("modal").style.display = "block";

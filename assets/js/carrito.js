@@ -1,3 +1,5 @@
+const API_BASE = "https://zippy-miracle-production.up.railway.app";
+
 function cargarCarrito() {
   const carrito = JSON.parse(localStorage.getItem("carrito")) || []; 
   const container = document.getElementById("carrito-container");
