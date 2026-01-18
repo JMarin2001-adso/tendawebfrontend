@@ -1,4 +1,5 @@
-const API_BASE = "https://zippy-miracle-production.up.railway.app";
+const API_BASE = "https://zippy-miracle-production-48f2.up.railway.app";
+
 
 function buscarFactura() {
     const inputDocumento = document.getElementById("documento").value.trim();

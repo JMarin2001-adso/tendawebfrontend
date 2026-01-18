@@ -1,4 +1,5 @@
-const API_BASE = "https://zippy-miracle-production.up.railway.app";
+const API_BASE = "https://zippy-miracle-production-48f2.up.railway.app";
+
 // Configuracion
 const API_URL = "${API_BASE}/producto";
 const STORAGE_KEY = "erp_product_edits_v1";
