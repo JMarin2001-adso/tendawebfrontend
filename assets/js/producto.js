@@ -12,7 +12,7 @@ let currentEditId = null;
  */
 async function reloadPanel() {
     try {
-        const res = await fetch(`${API_URL}/`);
+        const res = await fetch(`${API_BASE}/`);
         const data = await res.json();
         productosGlobal = data.data || data || [];
         renderizarLista();
@@ -100,7 +100,7 @@ window.guardarProductoGlobal = async function() {
     };
 
     try {
-        const res = await fetch(`${API_URL}/actualizar-precio`, {
+        const res = await fetch(`${API_BASE}/actualizar-precio`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
