@@ -1,7 +1,6 @@
 const API_BASE = "https://zippy-miracle-production-48f2.up.railway.app";
-
 // Configuracion
-const API_URL = "${API_BASE}/producto";
+const API_URL = `${API_BASE}/producto`;
 const STORAGE_KEY = "erp_product_edits_v1";
 
 let productosGlobal = [];
@@ -12,7 +11,7 @@ let currentEditId = null;
  */
 async function reloadPanel() {
     try {
-        const res = await fetch(`${API_BASE}/`);
+        const res = await fetch(`${API_URL}/`);
         const data = await res.json();
         productosGlobal = data.data || data || [];
         renderizarLista();
@@ -100,7 +99,7 @@ window.guardarProductoGlobal = async function() {
     };
 
     try {
-        const res = await fetch(`${API_BASE}/actualizar-precio`, {
+        const res = await fetch(`${API_URL}/actualizar-precio`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
