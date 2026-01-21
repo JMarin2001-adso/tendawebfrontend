@@ -71,7 +71,7 @@ window.closeModal = function() {
     currentEditId = null;
 };
 
-window.guardarProductoGlobal = async function() {
+window.guardarProductoGlobal = async function () {
     if (!currentEditId) return;
 
     const nuevoNombre = document.getElementById("edit-nombre").value;
@@ -90,19 +90,17 @@ window.guardarProductoGlobal = async function() {
         didOpen: () => Swal.showLoading()
     });
 
-    // 🔴 FormData
     const formData = new FormData();
     formData.append("id_producto", currentEditId);
     formData.append("nombre", nuevoNombre);
     formData.append("precio", nuevoPrecio);
 
-    // imagen opcional
-    if (imagenInput.files.length > 0) {
+    if (imagenInput && imagenInput.files.length > 0) {
         formData.append("imagen", imagenInput.files[0]);
     }
 
     try {
-        const res = await fetch(`${API_URL}/actualizar`, {
+        const res = await fetch(`${API_BASE}/actualizar-producto`, {
             method: "PUT",
             body: formData
         });
