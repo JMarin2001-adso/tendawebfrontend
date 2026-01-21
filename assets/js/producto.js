@@ -74,66 +74,68 @@ window.closeModal = function() {
 window.guardarProductoGlobal = async function() {
     if (!currentEditId) return;
 
-    // Obtener precios de los productos
     const nuevoNombre = document.getElementById("edit-nombre").value;
     const nuevoPrecio = parseFloat(document.getElementById("edit-precio").value);
+    const imagenInput = document.getElementById("edit-imagen");
 
     if (!nuevoNombre || isNaN(nuevoPrecio)) {
         Swal.fire('Atención', 'Nombre y precio son obligatorios', 'warning');
         return;
     }
 
-    // Mostrar estado de carga
     Swal.fire({
         title: 'Guardando...',
         text: 'Actualizando',
         allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
+        didOpen: () => Swal.showLoading()
     });
 
-    //se mandan los datos al backend
-    const payload = {
-        id_producto: parseInt(currentEditId),
-        nombre: nuevoNombre,
-        precio: nuevoPrecio
-    };
+    // 🔴 FormData
+    const formData = new FormData();
+    formData.append("id_producto", currentEditId);
+    formData.append("nombre", nuevoNombre);
+    formData.append("precio", nuevoPrecio);
+
+    // imagen opcional
+    if (imagenInput.files.length > 0) {
+        formData.append("imagen", imagenInput.files[0]);
+    }
 
     try {
-        const res = await fetch(`${API_URL}/actualizar-precio`, {
+        const res = await fetch(`${API_URL}/actualizar`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+            body: formData
         });
 
         const data = await res.json();
 
         if (res.ok && data.success) {
-            
+
             const overrides = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
             delete overrides[currentEditId];
             localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
 
-        
             await Swal.fire({
                 icon: 'success',
                 title: '¡Actualizado!',
-                text: 'El producto se guardó correctamente en la base de datos.',
+                text: 'Producto actualizado correctamente.',
                 timer: 2000,
                 showConfirmButton: false
             });
 
-            
             closeModal();
-            await reloadPanel(); 
+            await reloadPanel();
+
         } else {
             throw new Error(data.message || "Error al actualizar");
         }
 
     } catch (err) {
         console.error("Error:", err);
-        Swal.fire('Error de Sincronización', 'No se pudo guardar en MySQL. Verifica tu conexión.', 'error');
+        Swal.fire('Error', 'No se pudo guardar el producto.', 'error');
     }
 };
+
 
 // Inicializar al cargar la página
 document.addEventListener("DOMContentLoaded", reloadPanel);
