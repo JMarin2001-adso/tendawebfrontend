@@ -100,7 +100,8 @@ window.guardarProductoGlobal = async function () {
     }
 
     try {
-        const res = await fetch(`${API_BASE}/actualizar-producto`, {
+        // Cambia esto en tu fetch:
+        const res = await fetch(`${API_BASE}/producto/actualizar-producto`, { 
             method: "PUT",
             body: formData
         });
