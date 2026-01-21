@@ -72,20 +72,24 @@ window.closeModal = function() {
 };
 
 window.guardarProductoGlobal = async function () {
+    
     if (!currentEditId) return;
 
-    const nuevoNombre = document.getElementById("edit-nombre").value;
-    const nuevoPrecio = parseFloat(document.getElementById("edit-precio").value);
+    const nombreInput = document.getElementById("edit-nombre");
+    const precioInput = document.getElementById("edit-precio");
     const imagenInput = document.getElementById("edit-imagen");
 
+    const nuevoNombre = nombreInput.value.trim();
+    const nuevoPrecio = parseFloat(precioInput.value);
+
     if (!nuevoNombre || isNaN(nuevoPrecio)) {
-        Swal.fire('Atención', 'Nombre y precio son obligatorios', 'warning');
+        Swal.fire('Atención', 'El nombre y el precio son campos obligatorios', 'warning');
         return;
     }
 
     Swal.fire({
-        title: 'Guardando...',
-        text: 'Actualizando',
+        title: 'Guardando cambios...',
+        text: 'Subiendo imagen y actualizando base de datos',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
     });
@@ -95,46 +99,50 @@ window.guardarProductoGlobal = async function () {
     formData.append("nombre", nuevoNombre);
     formData.append("precio", nuevoPrecio);
 
+    
     if (imagenInput && imagenInput.files.length > 0) {
         formData.append("imagen", imagenInput.files[0]);
     }
 
     try {
-        // Cambia esto en tu fetch:
-        const res = await fetch(`${API_BASE}/producto/actualizar-producto`, { 
+        const res = await fetch(`${API_BASE}/actualizar-producto`, {
             method: "PUT",
             body: formData
         });
 
         const data = await res.json();
 
+        // 7. Manejo de la respuesta
         if (res.ok && data.success) {
-
+            // Limpiamos cualquier dato temporal en el almacenamiento local si existe
             const overrides = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
             delete overrides[currentEditId];
             localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
 
             await Swal.fire({
                 icon: 'success',
-                title: '¡Actualizado!',
-                text: 'Producto actualizado correctamente.',
+                title: '¡Éxito!',
+                text: 'El producto se ha actualizado correctamente.',
                 timer: 2000,
                 showConfirmButton: false
             });
 
-            closeModal();
-            await reloadPanel();
-
+            closeModal();       // Cerramos el modal de edición
+            await reloadPanel(); // Refrescamos la lista de productos para ver los cambios
         } else {
-            throw new Error(data.message || "Error al actualizar");
+            
+            throw new Error(data.message || "Error desconocido en el servidor");
         }
 
     } catch (err) {
-        console.error("Error:", err);
-        Swal.fire('Error', 'No se pudo guardar el producto.', 'error');
+        console.error("Error en la petición:", err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de actualización',
+            text: err.message || 'No se pudo conectar con el servidor.'
+        });
     }
 };
-
 
 // Inicializar al cargar la página
 document.addEventListener("DOMContentLoaded", reloadPanel);
