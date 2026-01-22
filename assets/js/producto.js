@@ -105,7 +105,7 @@ window.guardarProductoGlobal = async function () {
     }
 
     try {
-        const res = await fetch(`${API_BASE}/actualizar-producto`, {
+        const res = await fetch(`https://zippy-miracle-production-48f2.up.railway.app/actualizar-producto`, {
             method: "PUT",
             body: formData
         });
