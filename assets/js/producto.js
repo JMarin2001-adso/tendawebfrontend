@@ -72,7 +72,6 @@ window.closeModal = function() {
 };
 
 window.guardarProductoGlobal = async function () {
-    
     if (!currentEditId) return;
 
     const nombreInput = document.getElementById("edit-nombre");
@@ -95,26 +94,27 @@ window.guardarProductoGlobal = async function () {
     });
 
     const formData = new FormData();
+    
     formData.append("id_producto", currentEditId);
     formData.append("nombre", nuevoNombre);
     formData.append("precio", nuevoPrecio);
 
-    
     if (imagenInput && imagenInput.files.length > 0) {
         formData.append("imagen", imagenInput.files[0]);
     }
 
     try {
-        const res = await fetch(`https://zippy-miracle-production-48f2.up.railway.app/actualizar-producto`, {
+        const res = await fetch(`${API_BASE}/actualizar-producto`, {
             method: "PUT",
             body: formData
+        
         });
 
         const data = await res.json();
 
-        // 7. Manejo de la respuesta
+        
         if (res.ok && data.success) {
-            // Limpiamos cualquier dato temporal en el almacenamiento local si existe
+            
             const overrides = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
             delete overrides[currentEditId];
             localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
@@ -122,16 +122,17 @@ window.guardarProductoGlobal = async function () {
             await Swal.fire({
                 icon: 'success',
                 title: '¡Éxito!',
-                text: 'El producto se ha actualizado correctamente.',
-                timer: 2000,
+                text: data.mensaje || 'Actualizado correctamente', 
                 showConfirmButton: false
             });
 
-            closeModal();       // Cerramos el modal de edición
-            await reloadPanel(); // Refrescamos la lista de productos para ver los cambios
+            closeModal();
+            if (typeof reloadPanel === 'function') {
+                await reloadPanel(); 
+            }
         } else {
             
-            throw new Error(data.message || "Error desconocido en el servidor");
+            throw new Error(data.mensaje || "El servidor rechazó la actualización");
         }
 
     } catch (err) {
@@ -139,7 +140,7 @@ window.guardarProductoGlobal = async function () {
         Swal.fire({
             icon: 'error',
             title: 'Error de actualización',
-            text: err.message || 'No se pudo conectar con el servidor.'
+            text: err.message
         });
     }
 };
