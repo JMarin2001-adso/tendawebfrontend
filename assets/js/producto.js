@@ -72,8 +72,13 @@ window.closeModal = function() {
 };
 
 window.guardarProductoGlobal = async function () {
-    if (!currentEditId) return;
+    
+    if (!currentEditId) {
+        console.error("No se ha definido un ID para la edición.");
+        return;
+    }
 
+    
     const nombreInput = document.getElementById("edit-nombre");
     const precioInput = document.getElementById("edit-precio");
     const imagenInput = document.getElementById("edit-imagen");
@@ -81,20 +86,21 @@ window.guardarProductoGlobal = async function () {
     const nuevoNombre = nombreInput.value.trim();
     const nuevoPrecio = parseFloat(precioInput.value);
 
+    
     if (!nuevoNombre || isNaN(nuevoPrecio)) {
         Swal.fire('Atención', 'El nombre y el precio son campos obligatorios', 'warning');
         return;
     }
 
+
     Swal.fire({
         title: 'Guardando cambios...',
-        text: 'Subiendo imagen y actualizando base de datos',
+        text: 'Subiendo datos y actualizando base de datos en Railway',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
     });
 
     const formData = new FormData();
-    
     formData.append("id_producto", currentEditId);
     formData.append("nombre", nuevoNombre);
     formData.append("precio", nuevoPrecio);
@@ -104,43 +110,50 @@ window.guardarProductoGlobal = async function () {
     }
 
     try {
-        const res = await fetch(`${API_BASE}/actualizar-producto`, {
+        
+        const res = await fetch(`${API_BASE}/producto/actualizar-producto`, {
             method: "PUT",
             body: formData
-        
+            
         });
 
+       
         const data = await res.json();
 
-        
         if (res.ok && data.success) {
             
-            const overrides = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-            delete overrides[currentEditId];
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
+        
+            if (typeof STORAGE_KEY !== 'undefined') {
+                const overrides = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+                delete overrides[currentEditId];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
+            }
 
+            
             await Swal.fire({
                 icon: 'success',
                 title: '¡Éxito!',
-                text: data.mensaje || 'Actualizado correctamente', 
+                text: data.mensaje || 'El producto se ha actualizado correctamente.',
+                timer: 2000,
                 showConfirmButton: false
             });
 
-            closeModal();
-            if (typeof reloadPanel === 'function') {
-                await reloadPanel(); 
-            }
+            
+            if (typeof closeModal === 'function') closeModal();
+            if (typeof reloadPanel === 'function') await reloadPanel();
+
         } else {
             
-            throw new Error(data.mensaje || "El servidor rechazó la actualización");
+            throw new Error(data.mensaje || "El servidor no pudo procesar la actualización.");
         }
 
     } catch (err) {
+      
         console.error("Error en la petición:", err);
         Swal.fire({
             icon: 'error',
             title: 'Error de actualización',
-            text: err.message
+            text: err.message || 'No se pudo conectar con el servidor de Railway.'
         });
     }
 };
