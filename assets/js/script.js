@@ -21,15 +21,17 @@ document.addEventListener("DOMContentLoaded", () => {
     cargarNotificaciones();
 
     // Manejo del Dropdown de Notificaciones
-    const btnNotif = document.getElementById("btn-notificaciones");
-    const dropNotif = document.getElementById("notif-dropdown");
+    // === DROPDOWN DE NOTIFICACIONES (CORREGIDO) ===
+const btnNotif = document.getElementById("btn-notificaciones");
+const dropNotif = document.getElementById("notif-dropdown");
 
-    if (btnNotif && dropNotif) {
-        btnNotif.addEventListener("click", (e) => {
-            e.stopPropagation();
-            dropNotif.classList.toggle("show");
-        });
-    }
+if (btnNotif && dropNotif) {
+    btnNotif.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropNotif.classList.toggle("show");
+    });
+}
+
 
     // Manejo del Formulario de Registro
     const clienteForm = document.getElementById("clienteForm");
@@ -226,16 +228,41 @@ window.cerrarSesion = () => {
 async function cargarNotificaciones() {
     const id = localStorage.getItem("userId");
     if (!id) return;
+
     try {
         const res = await fetch(`${API_BASE}/envio/notificaciones/${id}`);
         const data = await res.json();
+
         const cont = document.getElementById("notificacion-mensaje");
+        const list = document.getElementById("notif-list");
+
+        if (!list) return;
+        list.innerHTML = "";
+
+        const noLeidas = data.filter(n => n.leida === 0);
+
+        // contador
         if (cont) {
-            const n = data.filter(x => x.leida === 0).length;
-            cont.textContent = n;
-            cont.style.display = n > 0 ? "block" : "none";
+            cont.textContent = noLeidas.length;
+            cont.style.display = noLeidas.length > 0 ? "block" : "none";
         }
-    } catch (e) { console.error(e); }
+
+        // listado
+        if (data.length === 0) {
+            list.innerHTML = `<li>No tienes notificaciones</li>`;
+            return;
+        }
+
+        data.forEach(n => {
+            const li = document.createElement("li");
+            li.textContent = n.mensaje;
+            if (n.leida === 0) li.style.fontWeight = "bold";
+            list.appendChild(li);
+        });
+
+    } catch (e) {
+        console.error("Error notificaciones:", e);
+    }
 }
 
 

@@ -114,76 +114,83 @@ buscador.addEventListener("input", () => {
 });
 
 
+// AGREGAR ENTRADA DE PRODUCTO
 
-//Agregar entrada de producto 
+
 formEntrada.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const id_producto = parseInt(document.getElementById("id_producto").value);
-    const nombreProducto = document.getElementById("producto").value.trim();
-    const precio = parseFloat(document.getElementById("precio").value);
-    const cantidad = parseInt(document.getElementById("cantidad").value);
-    const fecha = document.getElementById("fecha").value;
-    const idProveedor = parseInt(document.getElementById("proveedor").value);
-    const observacion = document.getElementById("observaciones").value.trim();
+    
+    const idProducto = parseInt(document.getElementById("id_producto").value);
 
-    let body;
-
-    if (id_producto === 0 || isNaN(id_producto)) {
-        body = {
-            id_producto: null,
-            nombre_producto: nombreProducto,
-            precio_adquirido: precio,
-            cantidad: cantidad,
-            fecha_ingreso: fecha,
-            id_proveedor: idProveedor,
-            observacion: observacion
-        };
-
-        console.log("📌 ENVIANDO A /entrada", body);
-
-        var url = "${API_BASE}/producto/entrada";
+    if (!idProducto || isNaN(idProducto)) {
+        alert("❌ El ID del producto es obligatorio");
+        return;
     }
 
-    //entrada de cantidad a productos existentes
-    else {
-        body = {
-            id_producto: id_producto,
-            precio_adquirido: precio,
-            cantidad: cantidad,
-            fecha_ingreso: fecha,
-            id_proveedor: idProveedor,
-            observacion: observacion
-        };
+    const body = {
+        id_producto: idProducto,
+        nombre_producto: document.getElementById("producto").value.trim(),
+        precio_adquirido: parseFloat(document.getElementById("precio").value),
+        cantidad: parseInt(document.getElementById("cantidad").value),
+        fecha_ingreso: document.getElementById("fecha").value,
+        id_proveedor: parseInt(document.getElementById("proveedor").value),
+        observacion: document.getElementById("observaciones").value.trim()
+    };
 
-        console.log("📌 ENVIANDO A /entrada-stock", body);
+    console.log("📦 Enviando entrada de producto:", body);
 
-        var url = "${API_BASE}/producto/entrada-stock";
+    
+    if (body.cantidad <= 0) {
+        alert("❌ La cantidad debe ser mayor a 0");
+        return;
     }
+
+    if (isNaN(body.precio_adquirido)) {
+        alert("❌ Precio inválido");
+        return;
+    }
+
 
     try {
-        const res = await fetch(url, {
+        const res = await fetch(`${API_BASE}/producto/producto/entrada`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify(body)
         });
 
         const data = await res.json();
+        console.log("📥 Respuesta backend:", data);
 
+        // ==========================
+        // 4️⃣ RESPUESTA
+        // ==========================
         if (res.ok && data.success) {
-            alert("Entrada registrada correctamente");
-            await cargarInventarioBackend();
+            alert("✅ Entrada de stock registrada correctamente");
+
+            // Recargar inventario
+            if (typeof cargarInventarioBackend === "function") {
+                await cargarInventarioBackend();
+            }
+
             formEntrada.reset();
-            closeFormEntrada();
+
+            
+            if (typeof closeFormEntrada === "function") {
+                closeFormEntrada();
+            }
+
         } else {
-            alert("Error: " + data.message);
+            alert("❌ " + (data.message || "Error al registrar la entrada"));
         }
 
     } catch (error) {
-        alert("❌ No se pudo conectar con backend");
+        console.error("❌ Error de conexión:", error);
+        alert("❌ No se pudo conectar con el servidor");
     }
 });
-
 
 
 //Registrar salida de productos

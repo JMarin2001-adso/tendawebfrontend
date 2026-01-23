@@ -327,7 +327,7 @@ footer {
 }
 
 /* Dropdown de notificaciones */
-.notif-dropdown {
+#notif-dropdown {
     display: none; /* Oculto por defecto */
     position: absolute;
     right: 0;
@@ -342,11 +342,11 @@ footer {
 }
 
 /* La clase que activa el JS */
-.notif-dropdown.show {
+#notif-dropdown.show {
     display: block !important;
 }
 
-.notif-dropdown ul {
+#notif-dropdown ul {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -354,7 +354,7 @@ footer {
     overflow-y: auto;
 }
 
-.notif-dropdown li {
+#notif-dropdown li {
     padding: 10px;
     border-bottom: 1px solid #eee;
     font-size: 13px;
@@ -362,6 +362,6 @@ footer {
     text-align: left;
 }
 
-.notif-dropdown li:hover {
+#notif-dropdown li:hover {
     background: #f4f4f4;
 }
