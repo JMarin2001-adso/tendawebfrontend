@@ -98,29 +98,89 @@ function mostrarClienteResumen() {
     `;
 }
 
-//seccion de productos, descargar producto y ver en pantalla
-function filtrarProductos() {
-    const texto = document.getElementById("buscarProducto").value.toLowerCase();
-    const lista = document.getElementById("listaProductos");
 
+// 2. Función principal de búsqueda
+async function filtrarProductos() {
+    const busquedaInput = document.getElementById("buscarProducto");
+    const listaUL = document.getElementById("listaProductos");
+
+    // Verificación de existencia de elementos en el HTML
+    if (!busquedaInput || !listaUL) return;
+
+    const texto = busquedaInput.value.toLowerCase().trim();
+
+    // Si hay menos de 2 letras, limpiamos la lista y salimos
     if (texto.length < 2) {
-        lista.innerHTML = "";
+        listaUL.innerHTML = "";
         return;
     }
 
-    fetch(`${API_BASE}/producto`)
-        .then(res => res.json())
-        .then(res => {
-            lista.innerHTML = "";
-            res.data
-                .filter(p => p.nombre.toLowerCase().includes(texto))
-                .forEach(p => {
-                    const li = document.createElement("li");
-                    li.textContent = `${p.nombre} (Stock: ${p.stock_actual})`;
-                    li.onclick = () => seleccionarProducto(p);
-                    lista.appendChild(li);
-                });
+    try {
+        // Llamada a tu API en Railway
+        // Asegúrate de que API_BASE esté bien definida (ej: const API_BASE = "https://tu-api.railway.app")
+        const response = await fetch(`${API_BASE}/producto`);
+        const result = await response.json();
+
+        /**
+         * Según tu Backend: 
+         * Tu JSON llega así: { "success": true, "data": [...] }
+         * Por eso accedemos a result.data
+         */
+        const productos = result.data || [];
+
+        // Limpiamos la lista antes de mostrar nuevos resultados
+        listaUL.innerHTML = "";
+
+        // Filtramos por el nombre que escribe el usuario
+        const filtrados = productos.filter(p => 
+            p.nombre && p.nombre.toLowerCase().includes(texto)
+        );
+
+        // Si no hay resultados
+        if (filtrados.length === 0) {
+            listaUL.innerHTML = "<li style='padding:10px; color:gray;'>No se encontró el producto</li>";
+            return;
+        }
+
+        // Dibujamos los productos encontrados
+        filtrados.forEach(p => {
+            const li = document.createElement("li");
+            
+            // Usamos 'stock_actual' que es el nombre que viene del JOIN en tu Backend
+            const stock = p.stock_actual !== undefined ? p.stock_actual : 0;
+            
+            li.textContent = `${p.nombre} (Stock: ${stock})`;
+            li.style.cursor = "pointer";
+            li.className = "item-busqueda"; // Puedes darle estilos en tu CSS
+
+            // Acción al hacer clic en el producto de la lista
+            li.onclick = () => {
+                seleccionarProducto(p); // Llama a la función de abajo
+                listaUL.innerHTML = ""; // Borra la lista de sugerencias
+                busquedaInput.value = p.nombre; // Escribe el nombre en el buscador
+            };
+
+            listaUL.appendChild(li);
         });
+
+    } catch (error) {
+        console.error("Error al buscar productos:", error);
+        listaUL.innerHTML = "<li style='color:red; padding:10px;'>Error al conectar con el servidor</li>";
+    }
+}
+
+// 3. Función para mostrar el detalle del producto seleccionado
+function seleccionarProducto(p) {
+    productoActual = p; // Guardamos el objeto completo para usarlo en la factura
+    
+    // Mostramos los datos en los contenedores de tu HTML
+    const nombreElem = document.getElementById("prodNombre");
+    const stockElem = document.getElementById("prodStock");
+    const detalleDiv = document.getElementById("detalleProducto");
+
+    if (nombreElem) nombreElem.innerText = p.nombre;
+    if (stockElem) stockElem.innerText = p.stock_actual; // El stock que viene de la tabla inventario
+    if (detalleDiv) detalleDiv.style.display = "block";
 }
 
 function seleccionarProducto(p) {
