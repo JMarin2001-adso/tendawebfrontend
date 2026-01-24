@@ -77,8 +77,15 @@ async function filtrarProductos() {
         });
 
     } catch (error) {
-        console.error("Error en búsqueda:", error);
-        listaUL.innerHTML = "<li style='color:red; padding:10px;'>Error de conexión con el servidor</li>";
+        // Esto imprimirá el error técnico real en la consola de desarrollador
+        console.error("DETALLE TÉCNICO:", error);
+
+        // Esto mostrará el mensaje específico del error en tu modal
+        listaUL.innerHTML = `
+            <li style='color:red; padding:10px; list-style:none;'>
+                <b>Error de conexión:</b> ${error.message} <br>
+                <small>Tipo: ${error.name}</small>
+            </li>`;
     }
 }
 
