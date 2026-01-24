@@ -480,3 +480,11 @@ input {
     float: right;
     font-size: 12px;
 }
+
+footer {
+  margin-top: 50px;
+  text-align: center;
+  padding: 15px;
+  background-color: #f0f0f0;
+  color: #333;
+}

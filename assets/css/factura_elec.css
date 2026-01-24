@@ -53,3 +53,11 @@ button {
     padding: 10px 16px;
     cursor: pointer;
 }
+
+footer {
+  margin-top: 50px;
+  text-align: center;
+  padding: 15px;
+  background-color: #f0f0f0;
+  color: #333;
+}
