@@ -24,7 +24,7 @@ async function filtrarProductos() {
     try {
         // Carga el catálogo de Railway solo si está vacío
         if (catalogoProductos.length === 0) {
-            const response = await fetch(`${API_BASE}/producto`);
+            const response = await fetch(`${API_BASE}/producto/`);
             if (!response.ok) throw new Error("Error al obtener productos");
             const result = await response.json();
             catalogoProductos = result.data || [];
