@@ -1,0 +1,97 @@
+* {
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f4f6f9;
+}
+
+.main-content {
+  margin-left: 260px;
+  padding: 25px;
+}
+
+h1, h2 {
+  margin-bottom: 15px;
+}
+
+.filtros {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 8px 14px;
+  border: none;
+  background: #0d6efd;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  background: white;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+thead {
+  background: #212529;
+  color: white;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: white;
+  padding: 18px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.card p {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.cuadre {
+  background: white;
+  padding: 20px;
+  border-radius: 6px;
+  max-width: 420px;
+}
+
+.cuadre label {
+  display: block;
+  margin-top: 10px;
+}
+
+.cuadre input,
+.cuadre textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+}
+
+.resultado {
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+.ok { color: green; }
+.sobrante { color: orange; }
+.faltante { color: red; }
