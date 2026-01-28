@@ -116,6 +116,14 @@
                 Total a pagar: $<span id="totalInvoice">0</span>
             </div>
         </section>
+        <section class="card">
+            <h2>Vendedor</h2>
+
+            <label for="id_vendedor">Seleccione el vendedor</label>
+            <select id="id_vendedor" class="form-control">
+                <option value="">Cargando vendedores...</option>
+            </select>
+        </section>
 
         <button class="btn-generate" onclick="generateInvoice()">
             Generar Factura Final
@@ -146,12 +154,6 @@
         </form>
     </div>
 </div>
-<div>
-    <label for="id_vendedor">Vendedor</label>
-    <select id="id_vendedor" class="form-control">
-        <option value="">Cargando vendedores...</option>
-    </select>
-</div>
 
 <div class="modal" id="productModal">
     <div class="modal-content">
@@ -177,11 +179,6 @@
         </div>
     </div>
 </div>
-
-<label for="id_vendedor">Vendedor</label>
-<select id="id_vendedor" class="form-control">
-    <option value="">Cargando vendedores...</option>
-</select>
 
 
 <div class="modal" id="modalConfirmacion">
