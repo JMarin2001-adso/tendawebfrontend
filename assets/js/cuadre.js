@@ -7,7 +7,7 @@ async function cargarEmpleados() {
 
     try {
         
-        const res = await fetch(`${API_BASE}/empleados`);
+        const res = await fetch(`${API_BASE}/user/empleados`);
         
         if (!res.ok) throw new Error("Error en el servidor");
 
