@@ -1,159 +1,107 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Cuadre de Caja</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  <link rel="stylesheet" href="assets/css/cuadre.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cierre de Caja | Mil Aromas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/cuadre.css">
 </head>
 <body>
 
-
-
-  <div class="topbar">
-
-      <button class="menu-btn" id="menu-toggle">
-        <i class="fas fa-bars"></i>
-      </button>
-
-  <div class="notifications">
-    <i class="fas fa-bell" id="notif-icon"></i>
-    <span id="notif-count" class="notif-count">0</span>
-    
-    <div class="notif-dropdown" id="notif-dropdown">
-      <h4>Pedidos en revisión</h4>
-      <ul id="notif-list"></ul>
-    </div>
-  </div>
-
-   
-      <div class="user-info" id="user-info">
-        <span id="user-name"></span>
-        <i class="fas fa-user" id="user-icon"></i>
-
-        <div class="dropdown" id="user-dropdown">
-          <button id="logout-btn">Cerrar sesión</button>
+<div class="dashboard-container">
+    <header class="main-header">
+        <h1><i class="fas fa-cash-register"></i> Control de Caja Diario</h1>
+        <div class="filtros-bar">
+            <div class="input-group">
+                <label><i class="fas fa-calendar-alt"></i> Fecha</label>
+                <input type="date" id="fecha">
+            </div>
+            <div class="input-group">
+              <label><i class="fas fa-user-tie"></i> Empleado</label>
+              <select id="id_usuario">
+                <option value="">Cargando empleados...</option>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="buscarVentas()">
+                <i class="fas fa-search"></i> Consultar
+            </button>
         </div>
-      </div>
+    </header>
 
-  </div>
+    <main class="grid-content">
+        <section class="tables-section">
+            <div class="table-card">
+                <h3><i class="fas fa-store"></i> Ventas Físicas (Local)</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Factura</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-fisicas"></tbody>
+                    </table>
+                </div>
+            </div>
 
- <nav class="sidebar" id="sidebar">
-    <h2 class="logo">Mil Aromas</h2>
-    <p class="subtitle">Panel de Empleados</p>
+            <div class="table-card">
+                <h3><i class="fas fa-globe"></i> Ventas Online</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Factura</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-online"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
-    <a class="nav-item active" data-page="panelempleado.html">
-        <i class="fas fa-home"></i> Inicio
-    </a>
+        <aside class="sidebar-summary">
+            <div class="stats-card">
+                <div class="stat-item">
+                    <span>Total Local:</span>
+                    <strong id="total-fisico">$0</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Total Online:</span>
+                    <strong id="total-online">$0</strong>
+                </div>
+                <hr>
+                <div class="stat-item total-final">
+                    <span>Total Sistema:</span>
+                    <strong id="total-sistema">$0</strong>
+                </div>
+            </div>
 
-    <a class="nav-item" data-page="inventario.html">
-        <i class="fas fa-box"></i> Inventario
-    </a>
+            <div class="cuadre-form" id="cuadre-box">
+                <h3>Finalizar Jornada</h3>
+                <div class="form-group">
+                    <label>Efectivo Real en Caja</label>
+                    <input type="number" id="input-caja" placeholder="0.00" oninput="calcularCuadre()">
+                </div>
+                
+                <div id="resultado" class="resultado-badge">Esperando datos...</div>
 
-    <a class="nav-item" data-page="producto.html">
-        <i class="fas fa-spray-can"></i> Productos
-    </a>
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea id="observacion" rows="3" placeholder="Notas sobre faltantes o sobrantes..."></textarea>
+                </div>
 
-    <a class="nav-item" data-page="envio.html">
-        <i class="fas fa-truck"></i> Envíos
-    </a>
-
-    <a class="nav-item" data-page="productoentrada.html">
-        <i class="fas fa-users"></i> Nuevo producto
-    </a>
-
-    <div class="nav-group">
-    <a class="nav-item" id="btn-transacciones">
-        <i class="fa-solid fa-tent-arrow-left-right"></i> Transacciones
-        <i class="fas fa-chevron-down arrow"></i>
-    </a>
-
-    <div class="submenu" id="submenu-transacciones">
-        <a class="nav-subitem" data-page="factura_manual.html">
-            Transacción
-        </a>
-        <a class="nav-subitem" data-page="gestor_fac.html">
-            Gestor facturas
-        </a>
-        <a class="nav-subitem" href="caja_diaria.html">
-            Cuadre diario
-        </a>
-    </div>
-</div>
-</nav>
-
-<div class="main-content">
-
-  <h1>Cuadre de Caja Diario</h1>
-
-  <!-- FILTRO -->
-  <div class="filtros">
-    <input type="date" id="fecha">
-    <button onclick="buscarVentas()">Buscar</button>
-  </div>
-
-  <!-- VENTAS FISICAS -->
-  <h2>Ventas físicas</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Hora</th>
-        <th>Factura</th>
-        <th>Empleado</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody id="tabla-fisicas"></tbody>
-  </table>
-
-  <!-- VENTAS ONLINE -->
-  <h2>Ventas online</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Hora</th>
-        <th>Factura</th>
-        <th>Empleado</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody id="tabla-online"></tbody>
-  </table>
-
-  <!-- RESUMEN -->
-  <div class="cards">
-    <div class="card">
-      <h3>Total físico</h3>
-      <p id="total-fisico">$0</p>
-    </div>
-    <div class="card">
-      <h3>Total online</h3>
-      <p id="total-online">$0</p>
-    </div>
-    <div class="card">
-      <h3>Total sistema</h3>
-      <p id="total-sistema">$0</p>
-    </div>
-  </div>
-
-  <!-- CUADRE -->
-  <div class="cuadre" id="cuadre-box">
-    <h3>Cuadre de caja</h3>
-
-    <label>Total sistema</label>
-    <input type="text" id="input-total" readonly>
-
-    <label>Dinero en caja</label>
-    <input type="number" id="input-caja" oninput="calcularCuadre()">
-
-    <label>Observación</label>
-    <textarea id="observacion"></textarea>
-
-    <div id="resultado" class="resultado"></div>
-
-    <button onclick="guardarCuadre()">Guardar cuadre</button>
-  </div>
-
+                <input type="hidden" id="input-total">
+                <button class="btn-success" id="btn-guardar" onclick="guardarCuadre()" disabled>
+                    <i class="fas fa-save"></i> Registrar Cuadre
+                </button>
+            </div>
+        </aside>
+    </main>
 </div>
 
 <script src="assets/js/cuadre.js"></script>

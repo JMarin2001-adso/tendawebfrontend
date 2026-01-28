@@ -1,82 +1,110 @@
 const API_BASE = "https://zippy-miracle-production-48f2.up.railway.app";
-const empleadoId = localStorage.getItem("empleadoId");
-const empleadoNombre = localStorage.getItem("empleadoNombre");
+let TOTAL_SISTEMA = 0; 
 
-let totalFisico = 0;
-let totalOnline = 0;
+async function cargarEmpleados() {
+    const select = document.getElementById("id_usuario");
+    if (!select) return;
 
-// Redirigir si no hay sesión
-if (!empleadoId) window.location.href = "loginempleado.html";
-document.getElementById("user-name").textContent = empleadoNombre;
+    try {
+        // Usamos la ruta que confirmaste que funciona en Swagger
+        const res = await fetch(`${API_BASE}/empleados`);
+        
+        if (!res.ok) throw new Error("Error en el servidor");
+
+        const empleados = await res.json();
+        
+        select.innerHTML = '<option value="">-- Seleccionar Empleado --</option>';
+
+        empleados.forEach(emp => {
+            const option = document.createElement("option");
+            option.value = emp.id_usuario;  // IDs: 2, 3, 7, 20, 28
+            option.textContent = emp.nombre; 
+            select.appendChild(option);
+        });
+
+        console.log("✅ Empleados cargados correctamente");
+
+    } catch (error) {
+        console.error("Fallo al cargar:", error);
+        select.innerHTML = '<option value="">Error al conectar</option>';
+    }
+}
+
+document.addEventListener("DOMContentLoaded", cargarEmpleados);
 
 async function buscarVentas() {
     const fecha = document.getElementById("fecha").value;
-    if (!fecha) return alert("Seleccione una fecha");
+    const idUser = document.getElementById("id_usuario").value;
+    if (!fecha || !idUser) return alert("Selecciona fecha y empleado");
 
-    await cargarFisicas(fecha);
-    await cargarOnline(fecha);
+    try {
+        // Consultar Ventas Físicas
+        const resF = await fetch(`${API_BASE}/cuadre-caja/ventas-diarias?fecha=${fecha}&id_usuario=${idUser}`);
+        const dataF = await resF.json();
 
-    const totalSistema = totalFisico + totalOnline;
-    document.getElementById("total-fisico").innerText = `$${totalFisico.toLocaleString()}`;
-    document.getElementById("total-online").innerText = `$${totalOnline.toLocaleString()}`;
-    document.getElementById("total-sistema").innerText = `$${totalSistema.toLocaleString()}`;
-    document.getElementById("input-total").value = totalSistema;
+        // Consultar Ventas Online
+        const resO = await fetch(`${API_BASE}/cuadre-caja/cuadre-online?fecha=${fecha}`);
+        const dataO = await resO.json();
 
-    verificarCuadreExistente(fecha);
+        // Consultar si ya existe cuadre
+        const resE = await fetch(`${API_BASE}/cuadre-caja/existe?fecha=${fecha}&id_usuario=${idUser}`);
+        const dataE = await resE.json();
+
+        renderTablas(dataF.ventas, dataO.ventas);
+        actualizarResumen(dataF.total_sistema || 0, dataO.total_online || 0);
+
+        const btn = document.getElementById("btn-guardar");
+        if (dataE.existe) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-lock"></i> Cuadre ya realizado';
+            alert("Atención: Ya se registró un cierre para este día.");
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Registrar Cuadre';
+        }
+    } catch (e) {
+        alert("Error de conexión con el servidor");
+    }
 }
 
-async function cargarFisicas(fecha) {
-    const res = await fetch(`${API_BASE}/cuadre-caja/ventas-diarias?fecha=${fecha}&id_usuario=${empleadoId}`);
-    const data = await res.json();
-    totalFisico = data.total_sistema || 0;
-    const tbody = document.getElementById("tabla-fisicas");
-    tbody.innerHTML = data.ventas.map(v => `
-        <tr>
-            <td>${new Date(v.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
-            <td>${v.numero_factura}</td>
-            <td>${empleadoNombre}</td>
-            <td>$${v.total.toLocaleString()}</td>
-        </tr>`).join('');
+function renderTablas(fisicas, online) {
+    const fBody = document.getElementById("tabla-fisicas");
+    const oBody = document.getElementById("tabla-online");
+    
+    fBody.innerHTML = fisicas.map(v => `<tr><td>${v.fecha.split('T')[1].substring(0,5)}</td><td>${v.numero_factura}</td><td>$${v.total.toLocaleString()}</td></tr>`).join('');
+    oBody.innerHTML = online.map(v => `<tr><td>${v.fecha.split('T')[1].substring(0,5)}</td><td>${v.numero_factura}</td><td>$${v.total.toLocaleString()}</td></tr>`).join('');
 }
 
-async function cargarOnline(fecha) {
-    const res = await fetch(`${API_BASE}/cuadre-caja/cuadre-online?fecha=${fecha}`);
-    const data = await res.json();
-    totalOnline = data.total_online || 0;
-    const tbody = document.getElementById("tabla-online");
-    tbody.innerHTML = data.ventas.map(v => `
-        <tr>
-            <td>${new Date(v.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
-            <td>${v.numero_factura}</td>
-            <td>Online</td>
-            <td>$${v.total.toLocaleString()}</td>
-        </tr>`).join('');
-}
-
-async function verificarCuadreExistente(fecha) {
-    const res = await fetch(`${API_BASE}/cuadre-caja/existe?fecha=${fecha}&id_usuario=${empleadoId}`);
-    const data = await res.json();
-    document.getElementById("cuadre-box").style.display = data.existe ? "none" : "block";
-    if(data.existe) alert("Ya existe un cuadre registrado para esta fecha.");
+function actualizarResumen(fisico, online) {
+    TOTAL_SISTEMA = fisico + online;
+    document.getElementById("total-fisico").innerText = `$${fisico.toLocaleString()}`;
+    document.getElementById("total-online").innerText = `$${online.toLocaleString()}`;
+    document.getElementById("total-sistema").innerText = `$${TOTAL_SISTEMA.toLocaleString()}`;
+    document.getElementById("input-total").value = TOTAL_SISTEMA;
 }
 
 function calcularCuadre() {
-    const total = Number(document.getElementById("input-total").value);
     const caja = Number(document.getElementById("input-caja").value);
-    const diff = caja - total;
-    const r = document.getElementById("resultado");
+    const diff = caja - TOTAL_SISTEMA;
+    const resDiv = document.getElementById("resultado");
 
-    r.className = "resultado " + (diff === 0 ? "ok" : diff > 0 ? "sobrante" : "faltante");
-    r.textContent = diff === 0 ? "✅ Caja cuadrada" : 
-                    diff > 0 ? `⚠️ Sobrante $${diff.toLocaleString()}` : 
-                    `❌ Faltante $${Math.abs(diff).toLocaleString()}`;
+    if (diff === 0) {
+        resDiv.className = "resultado-badge ok";
+        resDiv.innerText = "Caja Cuadrada Perfectamente";
+    } else if (diff > 0) {
+        resDiv.className = "resultado-badge warn";
+        resDiv.innerText = `Sobrante de $${diff.toLocaleString()}`;
+    } else {
+        resDiv.className = "resultado-badge error";
+        resDiv.innerText = `Faltante de $${Math.abs(diff).toLocaleString()}`;
+    }
 }
 
 async function guardarCuadre() {
     const payload = {
         fecha: document.getElementById("fecha").value,
-        id_usuario: parseInt(empleadoId),
-        total_sistema: Number(document.getElementById("input-total").value),
+        id_usuario: parseInt(document.getElementById("id_usuario").value),
+        total_sistema: TOTAL_SISTEMA,
         dinero_caja: Number(document.getElementById("input-caja").value),
         observacion: document.getElementById("observacion").value
     };
@@ -86,14 +114,7 @@ async function guardarCuadre() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    alert(data.message);
-    if(data.success) location.reload();
+    const resData = await res.json();
+    alert(resData.message);
+    if(resData.success) location.reload();
 }
-
-// Event Listeners para UI (Sidebar, Logout, etc.)
-document.getElementById("menu-toggle").addEventListener("click", () => document.getElementById("sidebar").classList.toggle("open"));
-document.getElementById("logout-btn").addEventListener("click", () => {
-    localStorage.clear();
-    window.location.href = "loginempleado.html";
-});
