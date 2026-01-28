@@ -1,20 +1,24 @@
 const API_BASE = "https://zippy-miracle-production-48f2.up.railway.app";
+let TOTAL_SISTEMA = 0;
 
+/* =========================
+   CARGAR EMPLEADOS
+========================= */
 async function cargarEmpleados() {
     const select = document.getElementById("id_usuario");
     if (!select) return;
 
     try {
-        const res = await fetch(`${API_BASE}/user/empleados`);
+        const res = await fetch(`${API_BASE}/user/empleados`, {
+            method: "GET",
+            credentials: "omit"
+        });
 
-        if (!res.ok) {
-            throw new Error("Error HTTP " + res.status);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const empleados = await res.json();
-        console.log("Empleados:", empleados);
 
-        select.innerHTML = '<option value="">-- Seleccionar empleado --</option>';
+        select.innerHTML = '<option value="">-- Seleccionar Empleado --</option>';
 
         empleados.forEach(emp => {
             const option = document.createElement("option");
@@ -23,77 +27,120 @@ async function cargarEmpleados() {
             select.appendChild(option);
         });
 
+        console.log("✅ Empleados cargados:", empleados);
+
     } catch (error) {
-        console.error("Error cargando empleados:", error);
-        select.innerHTML = '<option>Error al cargar</option>';
+        console.error("❌ Error cargando empleados:", error);
+        select.innerHTML = '<option value="">Error al cargar empleados</option>';
     }
 }
 
 document.addEventListener("DOMContentLoaded", cargarEmpleados);
 
-
+/* =========================
+   BUSCAR VENTAS
+========================= */
 async function buscarVentas() {
     const fecha = document.getElementById("fecha").value;
-    const idUser = document.getElementById("id_usuario").value;
+    const idUsuario = document.getElementById("id_usuario").value;
 
-    if (!fecha || !idUser) {
-        alert("Selecciona fecha y empleado");
+    if (!fecha || !idUsuario) {
+        alert("Selecciona una fecha y un empleado");
         return;
     }
 
     try {
-        console.log("🔍 Buscando ventas:", { fecha, idUser });
+        // 🔹 Ventas físicas
+        const resFisica = await fetch(
+            `${API_BASE}/cuadre-caja/ventas-diarias?fecha=${fecha}&id_usuario=${idUsuario}`
+        );
+        const dataFisica = await resFisica.json();
 
-        const [fisicas, online, existe] = await Promise.all([
-            fetch(`${API_BASE}/cuadre-caja/ventas-diarias?fecha=${fecha}&id_usuario=${idUser}`).then(r => r.json()),
-            fetch(`${API_BASE}/cuadre-caja/cuadre-online?fecha=${fecha}`).then(r => r.json()),
-            fetch(`${API_BASE}/cuadre-caja/existe?fecha=${fecha}&id_usuario=${idUser}`).then(r => r.json())
-        ]);
+        // 🔹 Ventas online
+        const resOnline = await fetch(
+            `${API_BASE}/cuadre-caja/cuadre-online?fecha=${fecha}`
+        );
+        const dataOnline = await resOnline.json();
 
-        console.log("📦 Ventas físicas:", fisicas);
-        console.log("🌐 Ventas online:", online);
-        console.log("🔒 Cuadre existe:", existe);
+        // 🔹 Verificar si ya existe cuadre
+        const resExiste = await fetch(
+            `${API_BASE}/cuadre-caja/existe?fecha=${fecha}&id_usuario=${idUsuario}`
+        );
+        const dataExiste = await resExiste.json();
 
-        renderTablas(fisicas.ventas || [], online.ventas || []);
-        actualizarResumen(fisicas.total_sistema || 0, online.total_online || 0);
+        console.log("📦 Data física:", dataFisica);
+        console.log("🌐 Data online:", dataOnline);
 
-        controlarBotonCuadre(existe.existe);
+        // 🔹 Soportar objeto o array
+        const ventasFisicas = dataFisica.ventas ?? dataFisica ?? [];
+        const ventasOnline = dataOnline.ventas ?? dataOnline ?? [];
+
+        // 🔹 Calcular totales seguros
+        const totalFisico = dataFisica.total_sistema ??
+            ventasFisicas.reduce((acc, v) => acc + Number(v.total || 0), 0);
+
+        const totalOnline = dataOnline.total_online ??
+            ventasOnline.reduce((acc, v) => acc + Number(v.total || 0), 0);
+
+        renderTablas(ventasFisicas, ventasOnline);
+        actualizarResumen(totalFisico, totalOnline);
+
+        // 🔹 Bloquear botón si ya existe cuadre
+        const btn = document.getElementById("btn-guardar");
+
+        if (dataExiste.existe) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-lock"></i> Cuadre ya registrado';
+            alert("⚠️ Ya existe un cuadre para este día y empleado.");
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Registrar Cuadre';
+        }
 
     } catch (error) {
-        console.error("❌ Error consultando ventas:", error);
+        console.error("❌ Error buscando ventas:", error);
         alert("Error al consultar ventas");
     }
 }
 
+/* =========================
+   RENDER TABLAS
+========================= */
 function renderTablas(fisicas, online) {
     const fBody = document.getElementById("tabla-fisicas");
     const oBody = document.getElementById("tabla-online");
 
-    fBody.innerHTML = fisicas.length
-        ? fisicas.map(v => `
+    fBody.innerHTML = "";
+    oBody.innerHTML = "";
+
+    if (!fisicas.length) {
+        fBody.innerHTML = `<tr><td colspan="3">Sin ventas físicas</td></tr>`;
+    } else {
+        fBody.innerHTML = fisicas.map(v => `
             <tr>
                 <td>${formatearHora(v.fecha)}</td>
                 <td>${v.numero_factura}</td>
                 <td>$${Number(v.total).toLocaleString()}</td>
             </tr>
-        `).join("")
-        : `<tr><td colspan="3">Sin ventas</td></tr>`;
+        `).join("");
+    }
 
-    oBody.innerHTML = online.length
-        ? online.map(v => `
+    if (!online.length) {
+        oBody.innerHTML = `<tr><td colspan="3">Sin ventas online</td></tr>`;
+    } else {
+        oBody.innerHTML = online.map(v => `
             <tr>
                 <td>${formatearHora(v.fecha)}</td>
                 <td>${v.numero_factura}</td>
                 <td>$${Number(v.total).toLocaleString()}</td>
             </tr>
-        `).join("")
-        : `<tr><td colspan="3">Sin ventas</td></tr>`;
+        `).join("");
+    }
 }
 
-function formatearHora(fechaISO) {
-    return fechaISO?.split("T")[1]?.substring(0, 5) || "--:--";
-}
-
+/* =========================
+   RESUMEN
+========================= */
 function actualizarResumen(fisico, online) {
     TOTAL_SISTEMA = fisico + online;
 
@@ -103,36 +150,34 @@ function actualizarResumen(fisico, online) {
     document.getElementById("input-total").value = TOTAL_SISTEMA;
 }
 
-function controlarBotonCuadre(existe) {
-    const btn = document.getElementById("btn-guardar");
-
-    if (existe) {
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-lock"></i> Cuadre ya registrado`;
-    } else {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fas fa-save"></i> Registrar Cuadre`;
-    }
-}
-
+/* =========================
+   CALCULAR CUADRE
+========================= */
 function calcularCuadre() {
-    const caja = Number(document.getElementById("input-caja").value || 0);
-    const diff = caja - TOTAL_SISTEMA;
-    const r = document.getElementById("resultado");
+    const caja = Number(document.getElementById("input-caja").value);
+    const resultado = document.getElementById("resultado");
+    const diferencia = caja - TOTAL_SISTEMA;
 
-    if (diff === 0) {
-        r.className = "resultado-badge ok";
-        r.innerText = "Caja cuadrada";
-    } else if (diff > 0) {
-        r.className = "resultado-badge warn";
-        r.innerText = `Sobrante $${diff.toLocaleString()}`;
+    if (isNaN(caja)) {
+        resultado.innerText = "Ingrese efectivo";
+        return;
+    }
+
+    if (diferencia === 0) {
+        resultado.className = "resultado-badge ok";
+        resultado.innerText = "Caja cuadrada perfectamente";
+    } else if (diferencia > 0) {
+        resultado.className = "resultado-badge warn";
+        resultado.innerText = `Sobrante de $${diferencia.toLocaleString()}`;
     } else {
-        r.className = "resultado-badge error";
-        r.innerText = `Faltante $${Math.abs(diff).toLocaleString()}`;
+        resultado.className = "resultado-badge error";
+        resultado.innerText = `Faltante de $${Math.abs(diferencia).toLocaleString()}`;
     }
 }
 
-
+/* =========================
+   GUARDAR CUADRE
+========================= */
 async function guardarCuadre() {
     const payload = {
         fecha: document.getElementById("fecha").value,
@@ -143,8 +188,6 @@ async function guardarCuadre() {
     };
 
     try {
-        console.log("💾 Guardando cuadre:", payload);
-
         const res = await fetch(`${API_BASE}/cuadre-caja/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -152,12 +195,20 @@ async function guardarCuadre() {
         });
 
         const data = await res.json();
-        alert(data.message);
+        alert(data.message || "Cuadre registrado");
 
         if (data.success) location.reload();
 
     } catch (error) {
-        console.error("❌ Error guardando cuadre:", error);
-        alert("No se pudo guardar el cuadre");
+        alert("Error guardando cuadre");
+        console.error(error);
     }
+}
+
+/* =========================
+   UTILIDAD
+========================= */
+function formatearHora(fecha) {
+    if (!fecha) return "--:--";
+    return fecha.split("T")[1]?.substring(0, 5) || "--:--";
 }
