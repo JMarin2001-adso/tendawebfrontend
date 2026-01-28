@@ -6,7 +6,7 @@ async function cargarEmpleados() {
     if (!select) return;
 
     try {
-        // Usamos la ruta que confirmaste que funciona en Swagger
+        
         const res = await fetch(`${API_BASE}/empleados`);
         
         if (!res.ok) throw new Error("Error en el servidor");
@@ -17,7 +17,7 @@ async function cargarEmpleados() {
 
         empleados.forEach(emp => {
             const option = document.createElement("option");
-            option.value = emp.id_usuario;  // IDs: 2, 3, 7, 20, 28
+            option.value = emp.id_usuario; 
             option.textContent = emp.nombre; 
             select.appendChild(option);
         });
@@ -38,15 +38,15 @@ async function buscarVentas() {
     if (!fecha || !idUser) return alert("Selecciona fecha y empleado");
 
     try {
-        // Consultar Ventas Físicas
+        
         const resF = await fetch(`${API_BASE}/cuadre-caja/ventas-diarias?fecha=${fecha}&id_usuario=${idUser}`);
         const dataF = await resF.json();
 
-        // Consultar Ventas Online
+     
         const resO = await fetch(`${API_BASE}/cuadre-caja/cuadre-online?fecha=${fecha}`);
         const dataO = await resO.json();
 
-        // Consultar si ya existe cuadre
+        
         const resE = await fetch(`${API_BASE}/cuadre-caja/existe?fecha=${fecha}&id_usuario=${idUser}`);
         const dataE = await resE.json();
 
