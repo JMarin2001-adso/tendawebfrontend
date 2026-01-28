@@ -466,7 +466,7 @@ async function cargarEmpleados() {
     }
 
     try {
-        const response = await fetch(`${API_BASE}/usuarios/empleados`, {
+        const response = await fetch(`${API_BASE}/user/vendedor`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
