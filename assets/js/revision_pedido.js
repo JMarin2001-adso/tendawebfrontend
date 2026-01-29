@@ -107,7 +107,7 @@ document.getElementById("btnAprobar").addEventListener("click", async () => {
     const res = await fetch(`${API_BASE}/pedido/aprobar/${id_pedido}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_empleado: parseInt(empleadoId) })
+        body: JSON.stringify({ id_empleado: parseInt(empleadoId),estado:"pagado" })
     });
 
     const data = await res.json();
