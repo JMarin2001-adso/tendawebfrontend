@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Auditoría de Ventas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="assets/css/panel_rotacion.css">
+</head>
+<body>
+
+<h2>Auditoría de Ventas por Rotación</h2>
+
+<!-- 🔎 Filtros -->
+<div class="filtros">
+    <label>
+        Fecha inicio:
+        <input type="date" id="fechaInicio">
+    </label>
+
+    <label>
+        Fecha fin:
+        <input type="date" id="fechaFin">
+    </label>
+
+    <button onclick="cargarVentas()">Buscar</button>
+</div>
+
+<!-- 📊 Gráfica -->
+<canvas id="graficaVentas"></canvas>
+
+<!-- 📋 Tabla -->
+<table>
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Total vendido</th>
+        </tr>
+    </thead>
+    <tbody id="tablaVentas"></tbody>
+</table>
+
+<script src="assets/js/panel_rotacion.js"></script>
+</body>
+</html>

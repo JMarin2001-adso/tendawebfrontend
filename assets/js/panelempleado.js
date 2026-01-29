@@ -156,6 +156,11 @@ async function cargarGraficaRotacion() {
     }
 }
 
+function irAVentasRotacion() {
+    window.open("panel_rotacion.html", "_blank");
+}
+
+
 //Cargar productos con stock bajo
 
 async function cargarGraficaStockBajo() {

@@ -343,6 +343,8 @@ function generateInvoice() {
     });
 }
 
+
+
 function imprimirFactura() {
     window.print();
 }
