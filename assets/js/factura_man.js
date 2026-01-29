@@ -295,10 +295,20 @@ function generateInvoice() {
         return;
     }
 
+    
+    const idEmpleadoSesion = localStorage.getItem("empleadoId"); 
+    
+    if (!idEmpleadoSesion) {
+        alert("Error: No se detectó una sesión de empleado activa. Por favor reingrese.");
+        window.location.href = "loginempleado.html";
+        return;
+    }
+
     // datos del clinete aparecen en resumen de factura
     const datosCliente = clienteSeleccionado.data || clienteSeleccionado;
 
     const payload = {
+        id_empleado: parseInt(idEmpleadoSesion),
         cliente: {
             documento: datosCliente.documento,
             nombre: datosCliente.nombre,
@@ -332,6 +342,10 @@ function generateInvoice() {
                 display.innerText = res.numero_factura;
                 modal.style.display = "flex";
             }
+
+            productosFactura = [];
+            actualizarTabla();
+
         } else {
             console.error("Detalle del error:", res);
             alert("Error: " + (res.message || "Los datos no son válidos para el servidor"));
@@ -456,56 +470,4 @@ document.querySelectorAll(".nav-subitem").forEach(item => {
         const page = item.getAttribute("data-page");
         window.location.href = page;
     });
-});
-
-
-async function cargarEmpleados() {
-    const select = document.getElementById("id_vendedor");
-
-    if (!select) {
-        console.warn("⚠️ Select id_vendedor no encontrado");
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_BASE}/user/vendedor`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log("📦 Respuesta empleados:", result);
-
-        if (!result.success) {
-            throw new Error(result.message || "Error desconocido");
-        }
-
-        
-        select.innerHTML = `<option value="">-- Seleccionar vendedor --</option>`;
-
-      
-        result.data.forEach(emp => {
-            const option = document.createElement("option");
-            option.value = emp.id_usuario;
-            option.textContent = emp.nombre;
-            select.appendChild(option);
-        });
-
-        console.log("✅ Empleados cargados correctamente");
-
-    } catch (error) {
-        console.error("❌ Error cargando empleados:", error);
-        select.innerHTML = `<option value="">Error al cargar empleados</option>`;
-    }
-}
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    cargarEmpleados();
 });
