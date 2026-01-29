@@ -154,7 +154,8 @@ th, td {
   font-size: 0.85rem;
   border-bottom: 1px solid var(--border);
   text-align: left;
-  color:white
+  color:white;
+  background: #555
 }
 
 tbody tr:hover {
