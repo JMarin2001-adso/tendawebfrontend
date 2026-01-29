@@ -474,7 +474,7 @@ document.querySelectorAll(".nav-subitem").forEach(item => {
 
 
 async function cargarEmpleados() {
-    const select = document.getElementById("id_vendedor");
+    const select = document.getElementById("id_usuario");
 
     if (!select) {
         console.warn("⚠️ Select id_vendedor no encontrado");
