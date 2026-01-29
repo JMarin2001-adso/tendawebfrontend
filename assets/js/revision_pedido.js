@@ -7,6 +7,13 @@ const id_pedido = urlParams.get("id");
 
 const pedidoInfo = document.getElementById("pedido-info");
 
+//validar sesion de empleado 
+const empleadoId = localStorage.getItem("empleadoId");
+const empleadoNombre = localStorage.getItem("empleadoNombre");
+
+if (!empleadoId) {
+    window.location.href = "loginempleado.html";
+}
 
 // Cargar información del pedido
 
@@ -94,108 +101,68 @@ function mostrarPedido(data) {
 
 
 // funciones de aprobar pedido
-
 document.getElementById("btnAprobar").addEventListener("click", async () => {
-    Swal.fire({
-        title: "Procesando...",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-    });
+    Swal.fire({ title: "Procesando...", didOpen: () => Swal.showLoading() });
 
-    const empId = localStorage.getItem("empleadoId");
-
-    const res = await fetch(`${API_BASE}/pedido/aprobar/${id_pedido}?id_empleado=${empId}`, {
+    const res = await fetch(`${API_BASE}/pedido/aprobar/${id_pedido}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_empleado: parseInt(empId) })
+        body: JSON.stringify({ id_empleado: parseInt(empleadoId) })
     });
 
     const data = await res.json();
-
     Swal.close();
 
     if (res.ok) {
-        Swal.fire("Pedido aprobado", "El pedido fue aprobado.", "success")
-            .then(() => cargarPedido());
+        Swal.fire("Aprobado", "El pedido fue aprobado.", "success").then(() => cargarPedido());
     } else {
-        Swal.fire("Error", data.detalle ||"No se pudo aprobar el pedido.", "error");
+        Swal.fire("Error", data.detalle || "Error al aprobar", "error");
     }
 });
 
-// funcion de rechazar pedido
 document.getElementById("btnRechazar").addEventListener("click", async () => {
-
     const { value: motivo } = await Swal.fire({
         title: "Motivo de rechazo",
         input: "text",
-        inputPlaceholder: "Ej: Pago inválido",
         showCancelButton: true
     });
 
     if (!motivo) return;
 
-    const empId = localStorage.getItem("empleadoId");
-
     const res = await fetch(`${API_BASE}/pedido/rechazar/${id_pedido}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ motivo: motivo,
-            id_empleado: parseInt(empId) })
+        body: JSON.stringify({ motivo, id_empleado: parseInt(empleadoId) })
     });
 
-    const data = await res.json();
-
     if (res.ok) {
-        Swal.fire("Rechazado", "El pedido fue rechazado.", "info")
-            .then(() => window.location.href = "panelempleado.html");
-    } else {
-        Swal.fire("Error", "No se pudo rechazar el pedido.", "error");
+        Swal.fire("Rechazado", "Pedido rechazado.", "info").then(() => window.location.href = "panelempleado.html");
     }
 });
 
-cargarPedido();
-
-//se confirma despacho de envio, se manda notificacion 
 async function confirmarDespacho() {
-    Swal.fire({
+    const result = await Swal.fire({
         title: "Confirmar despacho",
         text: "¿Deseas marcar este pedido como despachado?",
-        showCancelButton: true,
-        confirmButtonText: "Sí, despachar"
-    }).then(async (result) => {
-        if (!result.isConfirmed) return;
-
-        const empId = localStorage.getItem("empleadoId");
-
-        const res = await fetch(`${API_BASE}/pedido/despachar/${id_pedido}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id_empleado: parseInt(empId) })
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            Swal.fire(
-                "Despachado",
-                "El pedido fue marcado como despachado y el inventario actualizado.",
-                "success"
-            ). then(()=>{
-                window.location.href =`factura_elec.html?id=${id_pedido}`
-            })
-        } else {
-            Swal.fire("Error", "No se pudo despachar el pedido.", "error");
-        }
+        showCancelButton: true
     });
+
+    if (!result.isConfirmed) return;
+
+    const res = await fetch(`${API_BASE}/pedido/despachar/${id_pedido}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_empleado: parseInt(empleadoId) })
+    });
+
+    if (res.ok) {
+        Swal.fire("Despachado", "Redirigiendo a factura...", "success").then(() => {
+            window.location.href = `factura_elec.html?id=${id_pedido}`;
+        });
+    }
 }
 
-//validar sesion de empleado 
-const empleadoId = localStorage.getItem("empleadoId");
-const empleadoNombre = localStorage.getItem("empleadoNombre");
-
-if (!empleadoId) {
-    window.location.href = "loginempleado.html";
-}
+cargarPedido(); 
 
 // Mostrar nombre
 document.getElementById("user-name").textContent = empleadoNombre;

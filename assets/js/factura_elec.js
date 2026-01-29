@@ -4,6 +4,8 @@ const API_BASE = "https://zippy-miracle-production-48f2.up.railway.app";
 const params = new URLSearchParams(window.location.search);
 const id_pedido = params.get("id");
 
+const empleadoId = localStorage.getItem("empleadoId");
+
 async function cargarFactura() {
     try {
         //Obtener los detalles del pedido
@@ -64,7 +66,8 @@ async function guardarFacturaEnBaseDeDatos(id, total) {
             },
             body: JSON.stringify({
                 id_pedido: parseInt(id),
-                total: parseFloat(total)
+                total: parseFloat(total),
+                id_empleado: parseInt(empleadoId)
             })
         });
 
