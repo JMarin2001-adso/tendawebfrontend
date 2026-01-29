@@ -102,8 +102,12 @@ document.getElementById("btnAprobar").addEventListener("click", async () => {
         didOpen: () => Swal.showLoading()
     });
 
-    const res = await fetch(`${API_BASE}/pedido/aprobar/${id_pedido}`, {
-        method: "PUT"
+    const empId = localStorage.getItem("empleadoId");
+
+    const res = await fetch(`${API_BASE}/pedido/aprobar/${id_pedido}?id_empleado=${empId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_empleado: parseInt(empId) })
     });
 
     const data = await res.json();
@@ -130,10 +134,13 @@ document.getElementById("btnRechazar").addEventListener("click", async () => {
 
     if (!motivo) return;
 
+    const empId = localStorage.getItem("empleadoId");
+
     const res = await fetch(`${API_BASE}/pedido/rechazar/${id_pedido}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ motivo })
+        body: JSON.stringify({ motivo: motivo,
+            id_empleado: parseInt(empId) })
     });
 
     const data = await res.json();
@@ -158,8 +165,12 @@ async function confirmarDespacho() {
     }).then(async (result) => {
         if (!result.isConfirmed) return;
 
+        const empId = localStorage.getItem("empleadoId");
+
         const res = await fetch(`${API_BASE}/pedido/despachar/${id_pedido}`, {
-            method: "PUT"
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id_empleado: parseInt(empId) })
         });
 
         const data = await res.json();
