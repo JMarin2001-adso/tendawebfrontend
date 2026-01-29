@@ -42,9 +42,9 @@ document.addEventListener("DOMContentLoaded", cargarEmpleados);
 ========================= */
 async function buscarVentas() {
     const fecha = document.getElementById("fecha").value;
-    const idUsuario = document.getElementById("id_usuario").value;
+    const empleadoId = document.getElementById("id_usuario").value;
 
-    if (!fecha || !idUsuario) {
+    if (!fecha || !empleadoId) {
         alert("Selecciona una fecha y un empleado");
         return;
     }
@@ -52,19 +52,19 @@ async function buscarVentas() {
     try {
         // 🔹 Ventas físicas
         const resFisica = await fetch(
-            `${API_BASE}/cuadre-caja/ventas-diarias?fecha=${fecha}&id_usuario=${idUsuario}`
+            `${API_BASE}/cuadre-caja/ventas-diarias?fecha=${fecha}&id_empleado=${empleadoId}`
         );
         const dataFisica = await resFisica.json();
 
         // 🔹 Ventas online
         const resOnline = await fetch(
-            `${API_BASE}/cuadre-caja/cuadre-online?fecha=${fecha}`
+            `${API_BASE}/cuadre-caja/cuadre-online?fecha=${fecha}&id_empleado=${empleadoId}`
         );
         const dataOnline = await resOnline.json();
 
         // 🔹 Verificar si ya existe cuadre
         const resExiste = await fetch(
-            `${API_BASE}/cuadre-caja/existe?fecha=${fecha}&id_usuario=${idUsuario}`
+            `${API_BASE}/cuadre-caja/existe?fecha=${fecha}&id_empleado=${empleadoId}`
         );
         const dataExiste = await resExiste.json();
 
@@ -181,7 +181,7 @@ function calcularCuadre() {
 async function guardarCuadre() {
     const payload = {
         fecha: document.getElementById("fecha").value,
-        id_usuario: Number(document.getElementById("id_usuario").value),
+        id_empleado: Number(document.getElementById("id_usuario").value),
         total_sistema: TOTAL_SISTEMA,
         dinero_caja: Number(document.getElementById("input-caja").value),
         observacion: document.getElementById("observacion").value
