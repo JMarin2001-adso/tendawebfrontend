@@ -97,10 +97,9 @@ table {
     width: 100%;
     border-collapse: 20px;
     background: var(--color-card);
-    border-radius: 5px;
+    border-radius: 14px;
     overflow: hidden;
     box-shadow: var(--sombra);
-    padding: 20px;
 }
 
 thead {
